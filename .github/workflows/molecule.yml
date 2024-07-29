@@ -44,19 +44,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Make docker cache directory
+        run: mkdir -p ~/image-cache
+
       - id: image-cache
         uses: actions/cache@v1
         with:
           path: ~/image-cache
           key: image-cache-${{ runner.os }}
 
-      - if: steps.image-cache.outputs.cache-hit != 'true'
+      - name: Pull docker image
+        if: steps.image-cache.outputs.cache-hit != 'true'
         run: |
           IMAGE=geerlingguy/docker-${{ matrix.distro }}-ansible:latest
           docker pull $IMAGE
           docker save -o ~/image-cache/${{ matrix.distro }}.tar $IMAGE
 
-      - if: steps.image-cache.outputs.cache-hit == 'true'
+      - name: Load docker image
+        if: steps.image-cache.outputs.cache-hit == 'true'
         run: docker load -i ~/image-cache/${{ matrix.distro }}.tar
 
       - name: Install test dependencies
