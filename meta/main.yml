@@ -17,6 +17,6 @@ galaxy_info:
       versions:
         - '40'
   galaxy_tags:
-    - arcanist
+    - font
     - system
 dependencies: []
