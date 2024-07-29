@@ -1,0 +1,51 @@
+---
+- name: Assert input
+  ansible.builtin.assert:
+    that:
+      - arcanist_state in ['present', 'absent']
+
+- name: Install prerequisites
+  ansible.builtin.include_tasks: prerequisites.yml
+
+- name: Present
+  when: arcanist_state == 'present'
+  block:
+    - name: Clone repository
+      become: true
+      ansible.builtin.git:
+        repo: https://github.com/phacility/arcanist
+        dest: "{{ arcanist_install_dir }}"
+        version: "{{ arcanist_commit_hash }}"
+
+    - name: Ensure /etc/profile.d
+      become: true
+      ansible.builtin.file:
+        path: /etc/profile.d
+        state: directory
+        owner: root
+        group: root
+        mode: u=rwx,go=rx
+
+    - name: Add to PATH
+      become: true
+      ansible.builtin.copy:
+        content: export PATH="$PATH:{{ arcanist_install_dir }}/bin"
+        dest: /etc/profile.d/arcanist.sh
+        owner: root
+        group: root
+        mode: u=rw,go=r
+
+- name: Absent
+  when: arcanist_state == 'absent'
+  block:
+    - name: Remove from PATH
+      become: true
+      ansible.builtin.file:
+        path: /etc/profile.d/arcanist.sh
+        state: absent
+
+    - name: Remove arcanist directory
+      become: true
+      ansible.builtin.file:
+        path: "{{ arcanist_install_dir }}"
+        state: absent

@@ -1,0 +1,6 @@
+---
+- name: Test Local
+  hosts: localhost
+  connection: local
+  roles:
+    - labasubagia.arcanist

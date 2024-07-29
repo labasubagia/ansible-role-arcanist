@@ -1,0 +1,22 @@
+---
+- name: Install dependencies (apt)
+  become: true
+  ansible.builtin.apt:
+    name:
+      - git
+      - php
+      - php-curl
+    update_cache: true
+    state: present
+  when: ansible_pkg_mgr == "apt"
+
+- name: Install dependencies (dnf)
+  become: true
+  ansible.builtin.dnf:
+    name:
+      - git
+      - php
+      - php-curl
+    update_cache: true
+    state: present
+  when: ansible_pkg_mgr == "dnf"
